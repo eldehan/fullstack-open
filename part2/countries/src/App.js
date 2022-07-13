@@ -1,75 +1,47 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-const Search = ({ searchInput, handleSearchInput }) => {
-  return (
-    <div>
-      find countries
-      <input value={searchInput} onChange={handleSearchInput} />
-    </div>
-  );
-};
-
-const Results = ({ countries }) => {
-  if (Array.isArray(countries)) {
-    if (countries.length > 1) {
-      return (
-        <div>
-          {countries.map((country) => (
-            <p key={country.name.official}>{country.name.common}</p>
-          ))}
-        </div>
-      );
-    } else if (countries.length === 1) {
-      let country = countries[0];
-      let languages = Object.values(country.languages);
-
-      return (
-        <div>
-          <h1>{country.name.common}</h1>
-          <p>capital {country.capital[0]}</p>
-          <p>area {country.area}</p>
-          <h3>Languages:</h3>
-          {languages.map((language) => (
-            <p key={language}>{language}</p>
-          ))}
-        </div>
-      );
-    }
-  } else {
-    return <div></div>;
-  }
-};
+import Countries from "./components/Countries";
+import Country from "./components/Country";
 
 const App = () => {
-  const [searchInput, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [countries, setCountries] = useState([]);
+  const [countriesToShow, setCountriesToShow] = useState([]);
 
-  const handleSearchInput = (event) => {
-    setSearch(event.target.value);
-  };
-
-  const hook = () => {
+  useEffect(() => {
     axios.get("https://restcountries.com/v3.1/all").then((response) => {
-      let results = response.data.filter((country) => {
-        return country.name.common.includes(searchInput);
-      });
-
-      if (results.length > 10) {
-        setCountries("Too many matches, specify another filter");
-      } else {
-        setCountries(results);
-      }
+      setCountries(response.data);
     });
-  };
+  }, []);
 
-  useEffect(hook, [searchInput]);
+  const handleSearchInputChange = (event) => {
+    const search = event.target.value;
+    setSearchInput(search);
+    setCountriesToShow(
+      countries.filter((country) =>
+        country.name.common.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  };
 
   return (
-    <>
-      <Search searchInput={searchInput} handleSearchInput={handleSearchInput} />
-      <Results countries={countries} />
-    </>
+    <div>
+      <div>
+        Find countries{" "}
+        <input value={searchInput} onChange={handleSearchInputChange} />
+      </div>
+      {countriesToShow.length === 1 ? (
+        <Country country={countriesToShow[0]} />
+      ) : null}
+      {countriesToShow.length > 10 ? (
+        <div>Too many matches, specify another filter</div>
+      ) : (
+        <Countries
+          countriesToShow={countriesToShow}
+          setCountriesToShow={setCountriesToShow}
+        />
+      )}
+    </div>
   );
 };
 
