@@ -63,12 +63,12 @@ const App = () => {
         setNotification(`Information of ${name} has been removed from the server`)
         setTimeout(() => {
           setNotification(null)
-        }, 4000)})
+        }, 5000)})
       .catch((error) => {
         setNotification(`Error: Information of ${name} has already been removed from the server`)
         setTimeout(() => {
           setNotification(null)
-        }, 4000)
+        }, 5000)
       })
     }
 
@@ -100,9 +100,15 @@ const App = () => {
           setNotification(`Added ${newName}`)
           setTimeout(() => {
             setNotification(null)
-          }, 4000)
+          }, 5000)
           setNewName('')
           setNewNumber('')
+        })
+        .catch(error => {
+          setNotification(`Error: ${error.response.data.error}`)
+          setTimeout(() => {
+            setNotification(null)
+          }, 10000)
         })
     }
   }
